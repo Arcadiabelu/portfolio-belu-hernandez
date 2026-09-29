@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Belu Hernández | Fotografía</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;800;900&display=swap" rel="stylesheet">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📷</text></svg>">
+    
+    <style>
+        :root {
+            --bg: #eaeaea; 
+            --text: #111111;
+            --accent: #222222; 
+            --gray: #666666;
+            --border: rgba(0, 0, 0, 0.1);
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Montserrat', sans-serif;
+            line-height: 1.6;
+            overflow-x: hidden;
+        }
+
+        header {
+            padding: 3rem 5vw;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .logo {
+            font-weight: 900;
+            font-size: 1.5rem;
+            letter-spacing: -1px;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            color: var(--text);
+        }
+
+        .rec-dot {
+            width: 10px; height: 10px;
+            background-color: #ff2a2a; 
+            border-radius: 50%;
+            animation: pulse 1.5s infinite;
+            will-change: opacity;
+        }
+
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.2; } 100% { opacity: 1; } }
+
+        .contact-links a {
+            margin-left: 20px;
+            text-decoration: none;
+            color: var(--text);
+            font-weight: 600;
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            border-bottom: 1px solid transparent;
+            padding-bottom: 2px;
+            transition: all 0.3s;
+        }
+        
+        .contact-links a:hover { border-bottom: 1px solid var(--text); }
+
+        .hero { padding: 8vh 5vw; text-align: center; }
+        .hero h1 { font-size: clamp(2.5rem, 6vw, 5rem); font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: -2px; margin-bottom: 2rem; }
+        .hero p { max-width: 800px; margin: 0 auto; font-size: 1.1rem; font-weight: 400; color: #333; text-align: justify; }
+
+        .marquee-container { width: 100%; overflow: hidden; background-color: #111; color: #fff; padding: 1.5rem 0; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); white-space: nowrap; }
+        .marquee-content { 
+            display: inline-block; 
+            animation: scroll-marquee 30s linear infinite; 
+            font-weight: 800; 
+            font-size: 1.2rem; 
+            letter-spacing: 3px;
+            will-change: transform; 
+        }
+        .marquee-content span { margin: 0 2rem; opacity: 0.8; }
+        @keyframes scroll-marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+        .portfolio-section { padding: 4rem 5vw; }
+        .filters { display: flex; justify-content: center; gap: 2rem; margin-bottom: 4rem; flex-wrap: wrap; }
+        .filters button { background: none; border: none; font-family: 'Montserrat', sans-serif; font-size: 0.9rem; font-weight: 600; text-transform: uppercase; letter-spacing: 2px; cursor: pointer; color: var(--gray); transition: color 0.3s, border-bottom 0.3s; padding-bottom: 5px; border-bottom: 2px solid transparent; }
+        .filters button.active, .filters button:hover { color: var(--text); border-bottom: 2px solid var(--text); }
+
+        .gallery { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 2rem; }
+        
+        .photo-card { position: relative; aspect-ratio: 3/4; background: #333; cursor: pointer; overflow: hidden; transform: translateZ(0); }
+        
+        .photo-card::before, .photo-card::after { content: ''; position: absolute; width: 30px; height: 30px; border: 1px solid transparent; z-index: 2; transition: all 0.3s ease; pointer-events: none; }
+        .photo-card::before { top: 20px; left: 20px; border-top-color: transparent; border-left-color: transparent; }
+        .photo-card::after { bottom: 20px; right: 20px; border-bottom-color: transparent; border-right-color: transparent; }
+        .photo-card:hover::before { border-top-color: #fff; border-left-color: #fff; top: 15px; left: 15px; }
+        .photo-card:hover::after { border-bottom-color: #fff; border-right-color: #fff; bottom: 15px; right: 15px; }
+
+        .camera-ui { position: absolute; top: 20px; left: 25px; right: 25px; display: flex; justify-content: space-between; color: #fff; font-family: monospace; font-size: 0.7rem; letter-spacing: 2px; opacity: 0; transition: opacity 0.3s ease; z-index: 3; pointer-events: none; }
+        .crosshair { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: rgba(255, 255, 255, 0.6); font-size: 2rem; font-weight: 300; opacity: 0; transition: opacity 0.3s ease; z-index: 3; pointer-events: none; }
+        .photo-card:hover .camera-ui, .photo-card:hover .crosshair { opacity: 1; }
+
+        .photo-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.4s ease, filter 0.4s ease; will-change: transform; }
+        .photo-card:hover img { transform: scale(1.04); filter: brightness(0.6); }
+
+        .photo-card img.center-pedro { object-position: 30% center; }
+
+        .card-info { position: absolute; bottom: 0; left: 0; right: 0; padding: 2rem 1.5rem; color: white; opacity: 0; transform: translateY(10px); transition: all 0.3s ease; text-align: center; z-index: 3; }
+        .photo-card:hover .card-info { opacity: 1; transform: translateY(0); }
+        .card-info h3 { font-size: 1.3rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px;}
+        .card-info p { font-size: 0.75rem; font-weight: 400; text-transform: uppercase; letter-spacing: 2px; color: #ccc; }
+
+        .hidden { display: none !important; }
+
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(240, 240, 240, 0.98); z-index: 1000; display: flex; flex-direction: column; padding: 2rem 0; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .modal.active { opacity: 1; pointer-events: auto; }
+        
+        .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; border-bottom: 2px solid var(--text); padding: 0 5vw 1rem 5vw; }
+        .modal-header h2 { font-size: 1.5rem; text-transform: uppercase; font-weight: 900; }
+        .close-btn { background: none; border: none; font-size: 1rem; font-weight: 600; cursor: pointer; font-family: 'Montserrat', sans-serif; text-transform: uppercase; }
+        
+        .modal-gallery-wrapper {
+            flex-grow: 1; display: flex; align-items: center; width: 100%;
+            overflow-x: auto; white-space: nowrap; padding: 2rem 5vw;
+            scrollbar-width: none; -webkit-overflow-scrolling: touch; /* Suavidad nativa en móviles */
+            will-change: scroll-position;
+        }
+        .modal-gallery-wrapper::-webkit-scrollbar { display: none; }
+        
+        .modal-gallery-wrapper img {
+            height: 65vh; width: auto; display: inline-block; margin-right: 2rem;
+            border-radius: 2px; cursor: zoom-in; box-shadow: 0 10px 30px rgba(0,0,0,0.15);
+            transition: transform 0.3s ease, filter 0.3s ease;
+            opacity: 0;
+            animation: fadeInImage 0.6s ease forwards;
+        }
+        
+        @keyframes fadeInImage {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-gallery-wrapper img:hover { transform: scale(1.02) !important; filter: brightness(1.05); }
+
+        .lightbox { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(10, 10, 10, 0.98); z-index: 2000; display: flex; justify-content: center; align-items: center; opacity: 0; pointer-events: none; transition: opacity 0.3s ease; }
+        .lightbox.active { opacity: 1; pointer-events: auto; }
+        .lightbox img { max-width: 90vw; max-height: 90vh; object-fit: contain; box-shadow: 0 0 50px rgba(0,0,0,0.5); }
+        .lightbox-close { position: absolute; top: 25px; right: 40px; font-size: 2rem; color: #fff; background: none; border: none; cursor: pointer; font-family: 'Montserrat', sans-serif; font-weight: 300; }
+        .lightbox-prev, .lightbox-next { position: absolute; top: 50%; transform: translateY(-50%); font-size: 3rem; color: rgba(255,255,255,0.5); background: none; border: none; cursor: pointer; padding: 20px; transition: color 0.3s; }
+        .lightbox-prev:hover, .lightbox-next:hover { color: #fff; }
+        .lightbox-prev { left: 20px; }
+        .lightbox-next { right: 20px; }
+
+        /* Adaptación específica para móviles pequeños */
+        @media (max-width: 768px) { 
+            header { padding: 1.5rem 5vw; flex-direction: column; gap: 1rem; } 
+            .hero { padding: 5vh 5vw; }
+            .hero h1 { font-size: 2.2rem; } 
+            .hero p { font-size: 0.95rem; }
+            .filters { gap: 1rem; margin-bottom: 2rem; } 
+            .gallery { grid-template-columns: 1fr; gap: 1.5rem; }
+            .modal-gallery-wrapper img { height: 50vh; margin-right: 1rem; } 
+            .lightbox-prev, .lightbox-next { font-size: 2rem; padding: 10px; }
+        }
+    </style>
+</head>
+<body>
+
+    <header>
+        <a href="index.html" class="logo">
+            <div class="rec-dot"></div>
+            BELU HERNÁNDEZ
+        </a>
+        <nav class="contact-links">
+            <a href="contacto.html">Sobre mí / Contacto</a>
+        </nav>
+    </header>
+
+    <section class="hero">
+        <h1>El encuadre<br>preciso</h1>
+        <p>Afincada en Alicante, concibo la fotografía como un ejercicio de empatía visual. Mi trabajo consiste en adaptar el objetivo a la identidad de quien está al otro lado. He tenido la oportunidad de retratar a personalidades completamente diferentes, tanto en el sector musical, como en el de escritores, así como a rostros de la televisión o del cine. Con un tratamiento del color cuidado y siempre buscando una estética cálida, mi prioridad es que cada disparo tenga fuerza y hable por sí solo.</p>
+    </section>
+
+    <div class="marquee-container">
+        <div class="marquee-content">
+            <span>VIOLETA</span> • <span>CHIARA OLIVER</span> • <span>ANABEL ALONSO</span> • <span>RUSLANA</span> • <span>CONCIERTO OT25</span> • <span>PEDRO MARTÍ</span> • <span>JAVIER HOLGADO</span> • <span>ROSA RODRÍGUEZ</span> • <span>LLUÍS MOSQUERA</span> •
+            <span>VIOLETA</span> • <span>CHIARA OLIVER</span> • <span>ANABEL ALONSO</span> • <span>RUSLANA</span> • <span>CONCIERTO OT25</span> • <span>PEDRO MARTÍ</span> • <span>JAVIER HOLGADO</span> • <span>ROSA RODRÍGUEZ</span> • <span>LLUÍS MOSQUERA</span>
+        </div>
+    </div>
+
+    <section class="portfolio-section">
+        <div class="filters">
+            <button class="active" data-filter="all">Visor Completo</button>
+            <button data-filter="eventos">Eventos & Festivales</button>
+            <button data-filter="personalidades">Retratos & Personalidades</button>
+            <button data-filter="musica">Música & Foto Fija</button>
+        </div>
+
+        <main class="gallery">
+            
+            <article class="photo-card" data-category="personalidades" onclick="openAlbum('violeta', 'VIOLETA')">
+                <div class="camera-ui"><span>ISO 400</span><span>F/2.8</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/VIOLETA/portada.webp" alt="VIOLETA" loading="lazy">
+                <div class="card-info">
+                    <h3>VIOLETA</h3>
+                    <p>Música // Retrato</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="personalidades" onclick="openAlbum('chiara', 'Chiara Oliver')">
+                <div class="camera-ui"><span>ISO 200</span><span>F/4.0</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/CHIARA/portada.webp" alt="Chiara Oliver" loading="lazy">
+                <div class="card-info">
+                    <h3>Chiara Oliver</h3>
+                    <p>Música // Retrato</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="eventos" onclick="openAlbum('zoomin', 'Festival de Cine Zoom In 2026')">
+                <div class="camera-ui"><span>ISO 1600</span><span>1/250s</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/ANABEL ALONSO/DSC_9020 copia.webp" alt="Zoom In" loading="lazy">
+                <div class="card-info">
+                    <h3>Zoom In 2026</h3>
+                    <p>Evento // Festival de Cine</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="eventos personalidades" onclick="openAlbum('anabel', 'Anabel Alonso')">
+                <div class="camera-ui"><span>ISO 800</span><span>F/5.6</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/ANABEL ALONSO/portada.webp" alt="Anabel Alonso" loading="lazy">
+                <div class="card-info">
+                    <h3>Anabel Alonso</h3>
+                    <p>Cine // Retrato</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="eventos personalidades" onclick="openAlbum('javier', 'Javier Holgado')">
+                <div class="camera-ui"><span>ISO 400</span><span>F/2.8</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/JAVIER HOLGADO/portada.webp" alt="Javier Holgado" loading="lazy">
+                <div class="card-info">
+                    <h3>Javier Holgado</h3>
+                    <p>Cine // Retrato</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="eventos personalidades" onclick="openAlbum('lluis', 'Lluís Mosquera')">
+                <div class="camera-ui"><span>ISO 400</span><span>50MM</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/LLUÍS MOSQUERA/portada.webp" alt="Lluís Mosquera" loading="lazy">
+                <div class="card-info">
+                    <h3>Lluís Mosquera</h3>
+                    <p>Cine // Retrato</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="personalidades" onclick="openAlbum('ruslana', 'Ruslana')">
+                <div class="camera-ui"><span>ISO 800</span><span>F/1.8</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/RUSLANA/portada buena.webp" alt="Ruslana" loading="lazy">
+                <div class="card-info">
+                    <h3>Ruslana</h3>
+                    <p>Música // Retrato</p>
+                </div>
+            </article>
+            
+            <article class="photo-card" data-category="musica eventos" onclick="openAlbum('ot', 'Concierto OT25')">
+                <div class="camera-ui"><span>ISO 3200</span><span>1/500s</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/CONCIERTO/Portada copia.webp" alt="Concierto OT25" loading="lazy">
+                <div class="card-info">
+                    <h3>Concierto OT25</h3>
+                    <p>Música // Evento</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="personalidades" onclick="openAlbum('pedro', 'Pedro Martí')">
+                <div class="camera-ui"><span>ISO 200</span><span>35MM</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/PEDRO MARTÍ/portada.webp" alt="Pedro Martí" class="center-pedro" loading="lazy">
+                <div class="card-info">
+                    <h3>Pedro Martí</h3>
+                    <p>Editorial // Autor</p>
+                </div>
+            </article>
+
+            <article class="photo-card" data-category="personalidades" onclick="openAlbum('rosa', 'Rosa Rodríguez')">
+                <div class="camera-ui"><span>ISO 400</span><span>85MM</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/ROSA RODRÍGUEZ/portada.webp" alt="Rosa Rodríguez" loading="lazy">
+                <div class="card-info">
+                    <h3>Rosa Rodríguez</h3>
+                    <p>TV // Retrato</p>
+                </div>
+            </article>
+            
+            <article class="photo-card" data-category="musica personalidades" onclick="openAlbum('elsa', 'Elsa Grande')">
+                <div class="camera-ui"><span>ISO 200</span><span>F/4.0</span></div>
+                <div class="crosshair">+</div>
+                <img src="img/VIDEOCLIP ELSA GRANDE/portada copia.webp" alt="Elsa Grande" loading="lazy">
+                <div class="card-info">
+                    <h3>Elsa Grande</h3>
+                    <p>Música // Foto Fija</p>
+                </div>
+            </article>
+
+        </main>
+    </section>
+
+    <!-- Modal del Carrusel -->
+    <div id="gallery-modal" class="modal">
+        <div class="modal-header">
+            <h2 id="modal-title">Nombre</h2>
+            <button class="close-btn" onclick="closeAlbum()">Cerrar [X]</button>
+        </div>
+        <div class="modal-gallery-wrapper" id="modal-images"></div>
+    </div>
+
+    <!-- Visor de Foto Ampliada (Lightbox) -->
+    <div id="lightbox" class="lightbox">
+        <button class="lightbox-close" onclick="closeLightbox()">X</button>
+        <button class="lightbox-prev" onclick="changeLightboxImage(-1)">&#10094;</button>
+        <img id="lightbox-img" src="" alt="Ampliación">
+        <button class="lightbox-next" onclick="changeLightboxImage(1)">&#10095;</button>
+    </div>
+
+    <script>
+        const buttons = document.querySelectorAll('.filters button');
+        const cards = document.querySelectorAll('.photo-card');
+
+        buttons.forEach(button => {
+            button.addEventListener('click', () => {
+                buttons.forEach(btn => btn.classList.remove('active'));
+                button.classList.add('active');
+
+                const filter = button.getAttribute('data-filter');
+                cards.forEach(card => {
+                    const categories = card.getAttribute('data-category').split(' ');
+                    if (filter === 'all' || categories.includes(filter)) {
+                        card.classList.remove('hidden');
+                        setTimeout(() => card.style.opacity = '1', 50);
+                    } else {
+                        card.classList.add('hidden');
+                        card.style.opacity = '0';
+                    }
+                });
+            });
+        });
+
+        const photoDatabase = {
+            'violeta': [
+                'img/VIOLETA/aparte copia.webp', 'img/VIOLETA/DSC_2031 copia.webp', 'img/VIOLETA/DSC_2082 copia.webp',
+                'img/VIOLETA/DSC_2176 copia.webp', 'img/VIOLETA/DSC_2234-Mejorado-NR copia.webp', 'img/VIOLETA/DSC_2310-Mejorado-NR copia.webp',
+                'img/VIOLETA/DSC_2332 copia.webp', 'img/VIOLETA/portada.webp'
+            ],
+            'chiara': [
+                'img/CHIARA/DSC_1250-1 copia.webp', 'img/CHIARA/DSC_1269 copia.webp', 'img/CHIARA/DSC_1288 copia.webp',
+                'img/CHIARA/DSC_1301 copia.webp', 'img/CHIARA/DSC_1335 copia.webp', 'img/CHIARA/portada.webp'
+            ],
+            'zoomin': [
+                'img/ANABEL ALONSO/DSC_9020 copia.webp', 'img/ANABEL ALONSO/DSC_9103 copia.webp', 'img/ANABEL ALONSO/DSC_9234 copia.webp',
+                'img/ANABEL ALONSO/DSC_9265 copia.webp', 'img/ANABEL ALONSO/DSC_9448 copia 2.webp', 'img/ANABEL ALONSO/portada.webp',
+                'img/JAVIER HOLGADO/DSC_9484 copia.webp', 'img/JAVIER HOLGADO/DSC_9544 copia.webp', 'img/JAVIER HOLGADO/DSC_9593 copia.webp',
+                'img/JAVIER HOLGADO/DSC_9685 copia.webp', 'img/JAVIER HOLGADO/DSC_9725_1 copia.webp', 'img/JAVIER HOLGADO/DSC_9746_1 copia.webp',
+                'img/JAVIER HOLGADO/DSC_9751 copia.webp', 'img/JAVIER HOLGADO/DSC_9757 copia.webp', 'img/JAVIER HOLGADO/portada.webp',
+                'img/LLUÍS MOSQUERA/DSC_8595 copia.webp', 'img/LLUÍS MOSQUERA/DSC_8682 copia.webp', 'img/LLUÍS MOSQUERA/DSC_8697 copia.webp',
+                'img/LLUÍS MOSQUERA/portada.webp'
+            ], 
+            'anabel': [
+                'img/ANABEL ALONSO/DSC_9020 copia.webp', 'img/ANABEL ALONSO/DSC_9103 copia.webp', 'img/ANABEL ALONSO/DSC_9234 copia.webp',
+                'img/ANABEL ALONSO/DSC_9265 copia.webp', 'img/ANABEL ALONSO/DSC_9448 copia 2.webp', 'img/ANABEL ALONSO/portada.webp'
+            ], 
+            'javier': [
+                'img/JAVIER HOLGADO/DSC_9484 copia.webp', 'img/JAVIER HOLGADO/DSC_9544 copia.webp', 'img/JAVIER HOLGADO/DSC_9593 copia.webp',
+                'img/JAVIER HOLGADO/DSC_9685 copia.webp', 'img/JAVIER HOLGADO/DSC_9725_1 copia.webp', 'img/JAVIER HOLGADO/DSC_9746_1 copia.webp',
+                'img/JAVIER HOLGADO/DSC_9751 copia.webp', 'img/JAVIER HOLGADO/DSC_9757 copia.webp', 'img/JAVIER HOLGADO/portada.webp'
+            ], 
+            'lluis': [
+                'img/LLUÍS MOSQUERA/DSC_8595 copia.webp', 'img/LLUÍS MOSQUERA/DSC_8682 copia.webp', 'img/LLUÍS MOSQUERA/DSC_8697 copia.webp', 'img/LLUÍS MOSQUERA/portada.webp'
+            ], 
+            'ruslana': [
+                'img/RUSLANA/DSC_0827.webp',
+                'img/RUSLANA/DSC_0877.webp',
+                'img/RUSLANA/DSC_0971.webp',
+                'img/RUSLANA/DSC_0986.webp',
+                'img/RUSLANA/DSC_1025.webp',
+                'img/RUSLANA/portada buena.webp',
+                'img/RUSLANA/portada.webp'
+            ],
+            'ot': [
+                'img/CONCIERTO/IMG_9149-Mejorado-NR copia.webp', 'img/CONCIERTO/IMG_9184-Mejorado-NR copia.webp', 'img/CONCIERTO/IMG_9233 copia.webp',
+                'img/CONCIERTO/IMG_9264 copia.webp', 'img/CONCIERTO/IMG_9364 copia.webp', 'img/CONCIERTO/IMG_9457 copia.webp',
+                'img/CONCIERTO/IMG_9492-Mejorado-NR copia.webp', 'img/CONCIERTO/Portada copia.webp'
+            ],
+            'pedro': [
+                'img/PEDRO MARTÍ/DSC_7588_2.webp',
+                'img/PEDRO MARTÍ/DSC_7594.webp',
+                'img/PEDRO MARTÍ/DSC_7647.webp',
+                'img/PEDRO MARTÍ/DSC_7675.webp',
+                'img/PEDRO MARTÍ/DSC_7739-Recuperado.webp',
+                'img/PEDRO MARTÍ/portada.webp'
+            ],
+            'rosa': [
+                'img/ROSA RODRÍGUEZ/DSC_7285 copia.webp', 'img/ROSA RODRÍGUEZ/DSC_7320 copia.webp', 'img/ROSA RODRÍGUEZ/DSC_7340 copia.webp',
+                'img/ROSA RODRÍGUEZ/DSC_7345 copia.webp', 'img/ROSA RODRÍGUEZ/portada.webp'
+            ],
+            'elsa': [
+                'img/VIDEOCLIP ELSA GRANDE/DSC_1437 copia.webp', 'img/VIDEOCLIP ELSA GRANDE/DSC_1515 copia.webp', 'img/VIDEOCLIP ELSA GRANDE/DSC_1539 copia.webp', 'img/VIDEOCLIP ELSA GRANDE/portada copia.webp'
+            ]
+        };
+
+        const modal = document.getElementById('gallery-modal');
+        const modalTitle = document.getElementById('modal-title');
+        const modalImages = document.getElementById('modal-images');
+        let autoScrollInterval;
+        let currentAlbumPhotos = [];
+
+        function openAlbum(id, title) {
+            modalTitle.innerText = title;
+            modalImages.innerHTML = '';
+            
+            const photos = photoDatabase[id];
+            currentAlbumPhotos = photos; 
+
+            if(photos && photos.length > 0) {
+                photos.forEach((photoSrc, index) => {
+                    setTimeout(() => {
+                        const imgElement = document.createElement('img');
+                        imgElement.src = photoSrc;
+                        imgElement.alt = title;
+                        imgElement.loading = 'lazy';
+                        imgElement.onclick = () => openLightbox(index);
+                        modalImages.appendChild(imgElement);
+                    }, index * 150); 
+                });
+                
+                setTimeout(startAutoScroll, 500);
+            } else {
+                modalImages.innerHTML = '<p style="font-weight: 600; padding: 0 5vw;">Revelando fotografías...</p>';
+            }
+            
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden'; 
+        }
+
+        function closeAlbum() {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto'; 
+            stopAutoScroll();
+        }
+
+        function startAutoScroll() {
+            stopAutoScroll(); 
+            autoScrollInterval = setInterval(() => {
+                if (modalImages.scrollLeft >= (modalImages.scrollWidth - modalImages.clientWidth)) {
+                    modalImages.scrollLeft = 0; 
+                } else {
+                    modalImages.scrollLeft += 1; 
+                }
+            }, 30); 
+        }
+        
+        function stopAutoScroll() {
+            clearInterval(autoScrollInterval);
+        }
+
+        modalImages.addEventListener('mouseenter', stopAutoScroll);
+        modalImages.addEventListener('mouseleave', startAutoScroll);
+        modalImages.addEventListener('touchstart', stopAutoScroll);
+
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        let currentLightboxIndex = 0;
+
+        function openLightbox(index) {
+            currentLightboxIndex = index;
+            lightboxImg.src = currentAlbumPhotos[currentLightboxIndex];
+            lightbox.classList.add('active');
+            stopAutoScroll(); 
+        }
+
+        function closeLightbox() {
+            lightbox.classList.remove('active');
+        }
+
+        function changeLightboxImage(direction) {
+            currentLightboxIndex += direction;
+            if (currentLightboxIndex >= currentAlbumPhotos.length) {
+                currentLightboxIndex = 0;
+            }
+            if (currentLightboxIndex < 0) {
+                currentLightboxIndex = currentAlbumPhotos.length - 1;
+            }
+            lightboxImg.src = currentAlbumPhotos[currentLightboxIndex];
+        }
+
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+            if (e.key === 'ArrowLeft') changeLightboxImage(-1);
+            if (e.key === 'ArrowRight') changeLightboxImage(1);
+            if (e.key === 'Escape') closeLightbox();
+        });
+
+    </script>
+</body>
+</html>
