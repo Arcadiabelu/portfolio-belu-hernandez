@@ -128,9 +128,11 @@
         .modal-gallery-wrapper {
             flex-grow: 1; display: flex; align-items: center; width: 100%;
             overflow-x: auto; white-space: nowrap; padding: 2rem 5vw;
-            scrollbar-width: none; -webkit-overflow-scrolling: touch; /* Suavidad nativa en móviles */
+            scrollbar-width: none; -webkit-overflow-scrolling: touch; 
             will-change: scroll-position;
+            cursor: grab; /* Cursor de arrastrar */
         }
+        .modal-gallery-wrapper:active { cursor: grabbing; }
         .modal-gallery-wrapper::-webkit-scrollbar { display: none; }
         
         .modal-gallery-wrapper img {
@@ -139,6 +141,8 @@
             transition: transform 0.3s ease, filter 0.3s ease;
             opacity: 0;
             animation: fadeInImage 0.6s ease forwards;
+            user-select: none; /* Evita que la foto se seleccione al arrastrar */
+            -webkit-user-drag: none; /* Evita el comportamiento de arrastrar archivo del navegador */
         }
         
         @keyframes fadeInImage {
@@ -157,7 +161,6 @@
         .lightbox-prev { left: 20px; }
         .lightbox-next { right: 20px; }
 
-        /* Adaptación específica para móviles pequeños */
         @media (max-width: 768px) { 
             header { padding: 1.5rem 5vw; flex-direction: column; gap: 1rem; } 
             .hero { padding: 5vh 5vw; }
@@ -357,6 +360,7 @@
             });
         });
 
+        // Corregido el error de sintaxis en el objeto de la base de datos
         const photoDatabase = {
             'violeta': [
                 'img/VIOLETA/aparte copia.webp', 'img/VIOLETA/DSC_2031 copia.webp', 'img/VIOLETA/DSC_2082 copia.webp',
@@ -388,14 +392,13 @@
             'lluis': [
                 'img/LLUÍS MOSQUERA/DSC_8595 copia.webp', 'img/LLUÍS MOSQUERA/DSC_8682 copia.webp', 'img/LLUÍS MOSQUERA/DSC_8697 copia.webp', 'img/LLUÍS MOSQUERA/portada.webp'
             ], 
-        'ruslana': [
+            'ruslana': [
                 'img/RUSLANA/DSC_0827.webp',
                 'img/RUSLANA/DSC_0877.webp',
                 'img/RUSLANA/DSC_0986.webp',
                 'img/RUSLANA/DSC_1025.webp',
                 'img/RUSLANA/portada buena.webp',
                 'img/RUSLANA/portada.webp'
-            ],
             ],
             'ot': [
                 'img/CONCIERTO/IMG_9149-Mejorado-NR copia.webp', 'img/CONCIERTO/IMG_9184-Mejorado-NR copia.webp', 'img/CONCIERTO/IMG_9233 copia.webp',
@@ -424,6 +427,12 @@
         const modalImages = document.getElementById('modal-images');
         let autoScrollInterval;
         let currentAlbumPhotos = [];
+        
+        // Variables para la función de arrastrar
+        let isDown = false;
+        let isDragging = false;
+        let startX;
+        let scrollLeft;
 
         function openAlbum(id, title) {
             modalTitle.innerText = title;
@@ -439,7 +448,16 @@
                         imgElement.src = photoSrc;
                         imgElement.alt = title;
                         imgElement.loading = 'lazy';
-                        imgElement.onclick = () => openLightbox(index);
+                        
+                        // Diferenciar entre clic para abrir y arrastrar
+                        imgElement.onclick = (e) => {
+                            if (isDragging) {
+                                e.preventDefault();
+                                return;
+                            }
+                            openLightbox(index);
+                        };
+                        
                         modalImages.appendChild(imgElement);
                     }, index * 150); 
                 });
@@ -459,6 +477,7 @@
             stopAutoScroll();
         }
 
+        // Animación de scroll un poco más rápida (15ms en lugar de 30ms)
         function startAutoScroll() {
             stopAutoScroll(); 
             autoScrollInterval = setInterval(() => {
@@ -467,15 +486,50 @@
                 } else {
                     modalImages.scrollLeft += 1; 
                 }
-            }, 30); 
+            }, 15); 
         }
         
         function stopAutoScroll() {
             clearInterval(autoScrollInterval);
         }
 
-        modalImages.addEventListener('mouseenter', stopAutoScroll);
-        modalImages.addEventListener('mouseleave', startAutoScroll);
+        // Lógica de arrastrar y soltar (Drag & Scroll)
+        modalImages.addEventListener('mousedown', (e) => {
+            isDown = true;
+            isDragging = false;
+            modalImages.classList.add('active');
+            startX = e.pageX - modalImages.offsetLeft;
+            scrollLeft = modalImages.scrollLeft;
+            stopAutoScroll();
+        });
+
+        modalImages.addEventListener('mouseleave', () => {
+            isDown = false;
+            modalImages.classList.remove('active');
+            startAutoScroll();
+        });
+
+        modalImages.addEventListener('mouseup', () => {
+            isDown = false;
+            modalImages.classList.remove('active');
+            startAutoScroll();
+        });
+
+        modalImages.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - modalImages.offsetLeft;
+            const walk = (x - startX) * 2; // Velocidad de arrastre
+            
+            // Si te mueves más de 5 píxeles, se considera que estás arrastrando y no haciendo clic
+            if (Math.abs(walk) > 5) {
+                isDragging = true;
+            }
+            
+            modalImages.scrollLeft = scrollLeft - walk;
+        });
+        
+        // Pausar si estás en móvil y tocas la pantalla
         modalImages.addEventListener('touchstart', stopAutoScroll);
 
         const lightbox = document.getElementById('lightbox');
